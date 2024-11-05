@@ -52,5 +52,10 @@ about:
   license_file: LICENSE
 
 extra:
+  anaconda-services:
+    ref: https://anaconda.zendesk.com/agent/tickets/49522
+    reason: Client request
+  recipe-maintainers:
+    - ianaobi
   recipe-maintainers:
     - silvanocerza
