@@ -1,55 +1,76 @@
 {% set name = "haystack-ai" %}
-{% set version = "2.5.1" %}
+{% set version = "2.25.2" %}
 
 package:
   name: {{ name|lower }}
   version: {{ version }}
 
 source:
-  url: https://pypi.io/packages/source/{{ name[0] }}/{{ name }}/haystack_ai-{{ version }}.tar.gz
-  sha256: 3887b59f4ed5b678520d4242ada67bf00178f4c750c96c6fd09476d450e7543d
+  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/haystack_ai-{{ version }}.tar.gz
+  sha256: e1be0ed36a379605c2cfbb7140585b77c56e2aa053339ab5d1d75826b48c44ec
 
 build:
-  noarch: python
+  skip: true  # [py<310]
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
   number: 0
 
 requirements:
   host:
-    - python >=3.8
+    - python
     - hatchling >=1.8.0
     - pip
   run:
-    - python >=3.8
-    - pandas
-    - tqdm
-    - tenacity
-    - lazy-imports
-    - openai >=1.1.0
+    - python
+    - docstring_parser
+    - filetype
     - jinja2
-    - posthog
-    - pyyaml
+    - jsonschema
+    - lazy-imports
     - more-itertools
     - networkx
-    - typing-extensions >=4.7
-    - requests
-    - numpy <2.0.0
+    - numpy
+    - openai >=1.99.2
+    - posthog !=3.12.0
+    - pydantic
     - python-dateutil
-    - haystack-experimental
+    - pyyaml
+    - requests
+    - tenacity !=8.4.0
+    - tqdm
+    - typing-extensions >=4.7
+    # NOTE: haystack-experimental is intentionally OMITTED here to break a
+    # circular dependency (haystack-ai <-> haystack-experimental).
+    # haystack-ai never imports haystack_experimental at runtime — the upstream
+    # PyPI dependency is purely a convenience install. Build haystack-experimental
+    # AFTER this package; it depends on haystack-ai.
+  run_constrained:
+    - haystack-experimental >=0.19.0
 
 test:
   imports:
     - haystack
+    - haystack.components
+    - haystack.core
   commands:
-    - pip check
-  requires:
-    - pip
+    # pip check omitted: haystack-ai's upstream metadata declares
+    # haystack-experimental as a dependency, but we intentionally omit it
+    # to break the circular dep. pip check would flag it as missing.
+    - python -c "import haystack; print(haystack.__version__)"
 
 about:
   home: https://github.com/deepset-ai/haystack
   summary: LLM framework to build customizable, production-ready LLM applications. Connect components (models, vector DBs, file converters) to pipelines or agents that can interact with your data.
+  description: |
+    Haystack is an end-to-end LLM framework that allows you to build applications
+    powered by LLMs, Transformer models, vector search and more. Whether you want
+    to perform retrieval-augmented generation (RAG), document search, question
+    answering or custom pipelines, you can use the state-of-the-art embedding
+    models and LLMs with Haystack to build end-to-end NLP applications.
   license: Apache-2.0
+  license_family: Apache
   license_file: LICENSE
+  doc_url: https://docs.haystack.deepset.ai/docs/intro
+  dev_url: https://github.com/deepset-ai/haystack
 
 extra:
   recipe-maintainers:
